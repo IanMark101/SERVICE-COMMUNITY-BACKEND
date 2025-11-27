@@ -77,6 +77,21 @@ export const adminRepository = {
     return prisma.serviceCategory.create({ data: { name } });
   },
 
+  async getAllCategories() {
+    return prisma.serviceCategory.findMany({ orderBy: { createdAt: "desc" } });
+  },
+
+  async updateCategory(id: string, name: string) {
+    return prisma.serviceCategory.update({
+      where: { id },
+      data: { name },
+    });
+  },
+
+  async deleteCategory(id: string) {
+    return prisma.serviceCategory.delete({ where: { id } });
+  },
+
   // -----------------------
   // Admin own info
   // -----------------------

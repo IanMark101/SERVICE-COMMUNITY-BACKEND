@@ -23,4 +23,14 @@ export const reportService = {
     const reports = await reportRepository.getAll();
     return { totalReports: reports.length, reports };
   },
+
+  // ✅ DELETE REPORT
+  async deleteReport(reportId: string) {
+    const existing = await reportRepository.findById(reportId);
+    if (!existing) {
+      throw new Error("Report not found");
+    }
+
+    return reportRepository.delete(reportId);
+  }
 };

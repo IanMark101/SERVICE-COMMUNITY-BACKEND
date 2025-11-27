@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma";
 import { adminService } from "../services/adminService";
+import { reportService } from "../services/reportService";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -40,9 +41,7 @@ export const getAdminInfo = async (req: Request, res: Response) => {
   }
 };
 
-// -----------------------
-// Admin update own info
-// -----------------------
+// Update admin info
 export const updateAdminInfo = async (req: Request, res: Response) => {
   try {
     const adminId = (req as any).adminId;
@@ -98,6 +97,18 @@ export const getReports = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a report
+export const deleteReport = async (req: Request, res: Response) => {
+  try {
+    const reportId = req.params.id;
+    await reportService.deleteReport(reportId);
+    res.json({ message: "Report deleted successfully" });
+  } catch (error: any) {
+    console.error("DeleteReport error:", error);
+    res.status(400).json({ message: error.message || "Server error" });
+  }
+};
+
 // Ban a user
 export const banUser = async (req: Request, res: Response) => {
   try {
@@ -135,7 +146,46 @@ export const createCategory = async (req: Request, res: Response) => {
   }
 };
 
-// Get posts stats
+// Get all categories
+export const getAllCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await adminService.getAllCategories();
+    res.json(categories);
+  } catch (err: any) {
+    console.error("getAllCategories error:", err);
+    res.status(500).json({ message: "Failed to fetch categories" });
+  }
+};
+
+// Update a category
+export const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // match route param
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: "Name is required" });
+
+    const updated = await adminService.updateCategory(id, name);
+    res.json({ message: "Category updated successfully", category: updated });
+  } catch (err: any) {
+    console.error("updateCategory error:", err);
+    res.status(500).json({ message: err.message || "Failed to update category" });
+  }
+};
+
+// Delete a category
+export const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // match route param
+    await adminService.deleteCategory(id);
+    res.json({ message: "Category deleted successfully" });
+  } catch (err: any) {
+    console.error("deleteCategory error:", err);
+    res.status(500).json({ message: err.message || "Failed to delete category" });
+  }
+};
+
+
+// Posts stats
 export const getPostsStats = async (req: Request, res: Response) => {
   try {
     const stats = await adminService.getPostsStats();
@@ -143,5 +193,27 @@ export const getPostsStats = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all offers
+export const getAllOffers = async (req: Request, res: Response) => {
+  try {
+    const offers = await adminService.getAllOffers();
+    res.json(offers);
+  } catch (err: any) {
+    console.error("getAllOffers error:", err);
+    res.status(500).json({ message: "Failed to fetch offers" });
+  }
+};
+
+// Get all requests
+export const getAllRequests = async (req: Request, res: Response) => {
+  try {
+    const requests = await adminService.getAllRequests();
+    res.json(requests);
+  } catch (err: any) {
+    console.error("getAllRequests error:", err);
+    res.status(500).json({ message: "Failed to fetch requests" });
   }
 };

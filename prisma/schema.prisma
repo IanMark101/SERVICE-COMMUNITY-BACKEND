@@ -31,6 +31,10 @@ model User {
   reportsReceived Report[] @relation("UserReportsReceived")
 
   banned          Boolean         @default(false) 
+
+  // --- Added for messages ---
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
 model Admin {
@@ -89,6 +93,17 @@ model Report {
 
   reporter User @relation("UserReportsMade", fields: [reporterId], references: [id])
   reported User @relation("UserReportsReceived", fields: [reportedId], references: [id])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  text       String
+  createdAt  DateTime @default(now())
+
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
 enum Role {

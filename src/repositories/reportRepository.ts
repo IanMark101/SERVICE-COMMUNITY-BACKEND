@@ -25,4 +25,18 @@ export const reportRepository = {
   async findUserById(userId: string) {
     return prisma.user.findUnique({ where: { id: userId } });
   },
+
+  // 🔍 Find a report by ID
+  async findById(id: string) {
+    return prisma.report.findUnique({
+      where: { id },
+    });
+  },
+
+  // ❌ Delete a report
+  async delete(id: string) {
+    return prisma.report.delete({
+      where: { id },
+    });
+  }
 };

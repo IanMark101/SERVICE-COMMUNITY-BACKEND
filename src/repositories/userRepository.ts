@@ -18,15 +18,13 @@ export const userRepository = {
     return prisma.user.update({ where: { id }, data });
   },
 
-  // 🔍 Search & Pagination
+  // Search & Pagination
   async searchUsers(params: { search?: string; skip: number; take: number }) {
     const { search, skip, take } = params;
 
     return prisma.user.findMany({
       where: search
-        ? {
-            name: { contains: search, mode: "insensitive" },
-          }
+        ? { name: { contains: search, mode: "insensitive" } }
         : {},
       skip,
       take,
@@ -43,48 +41,52 @@ export const userRepository = {
     });
   },
 
-  // ⭐ NEW: FULL USER PROFILE (offers + ratings)
-  // src/repositories/userRepository.ts
+  // FULL USER PROFILE WITH OFFERS, RATINGS, AND REQUESTS
+  async getUserProfile(userId: string) {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePicture: true,
+        createdAt: true,
 
-async getUserProfile(userId: string) {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      profilePicture: true,
-      createdAt: true,
+        // Offers with ratings
+        offers: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            createdAt: true,
+            ratings: {
+              select: {
+                id: true,
+                stars: true,
+                createdAt: true,
+              },
+            },
+          },
+        },
 
-      // Service offers
-      offers: {
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          createdAt: true,
+        // Service requests
+        requests: {
+          select: {
+            id: true,
+            description: true,
+            createdAt: true,
+          },
+        },
+
+        // Ratings received overall
+        ratings: {
+          select: {
+            id: true,
+            stars: true,
+            createdAt: true,
+          },
         },
       },
-
-      // Service requests
-      requests: {
-        select: {
-          id: true,
-          description: true,
-          createdAt: true,
-        },
-      },
-
-      // Ratings received as provider
-      ratings: {
-        select: {
-          id: true,
-          stars: true,
-          createdAt: true,
-        },
-      },
-    },
-  });
-}
-
+    });
+  },
 };

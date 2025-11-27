@@ -1,56 +1,47 @@
 import express from "express";
 import {
-  adminLogin,
-  getAdminInfo,
-  updateAdminInfo,
-  getUserStats,
-  getUsers,
-  getReports,
-  banUser,
-  unbanUser,
-  createCategory,
-  getPostsStats,
+  adminLogin, getAdminInfo, updateAdminInfo,
+  getUserStats, getUsers, banUser, unbanUser,
+  getReports, deleteReport,
+  createCategory, getAllCategories, updateCategory, deleteCategory,
+  getPostsStats, getAllOffers, getAllRequests
 } from "../controllers/adminController";
 
 import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 
 const router = express.Router();
 
-// ---------------------------
-// Public route: Admin login
-// ---------------------------
+// Public
 router.post("/login", adminLogin);
 
-// ---------------------------
-// Protected routes: Admin only
-// ---------------------------
+// Protected
 router.use(adminAuthMiddleware);
 
-// Get current logged-in admin info
+// Admin info
 router.get("/me", getAdminInfo);
-
-// Update current admin info
 router.patch("/me", updateAdminInfo);
 
-// Get total users in last X days (query param: days)
-router.get("/stats/users", getUserStats);
-
-// Get all users (optional filter: ?banned=true)
+// Users
 router.get("/users", getUsers);
-
-// Get all pending reports with reporter & reported info
-router.get("/reports", getReports);
-
-// Ban a user by ID
 router.patch("/user/:userId/ban", banUser);
-
-// Unban a user by ID
 router.patch("/user/:userId/unban", unbanUser);
 
-// Create a new service category
-router.post("/category", createCategory);
+// Reports
+router.get("/reports", getReports);
+router.delete("/reports/:id", deleteReport);
 
-// Get total posted offers & requests
+// Categories CRUD
+router.post("/category", createCategory);
+router.get("/categories", getAllCategories);
+router.patch("/category/:id", updateCategory);
+router.delete("/category/:id", deleteCategory);
+
+// Posts & offers/requests
 router.get("/stats/posts", getPostsStats);
+router.get("/offers", getAllOffers);
+router.get("/requests", getAllRequests);
+
+router.get("/stats/users", getUserStats);
+
 
 export default router;

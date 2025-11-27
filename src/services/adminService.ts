@@ -1,5 +1,6 @@
 import { adminRepository } from "../repositories/adminRepository";
 import bcrypt from "bcryptjs";
+import prisma from "../prisma"; // For offers & requests
 
 export const adminService = {
   async banUser(userId: string) {
@@ -42,13 +43,39 @@ export const adminService = {
     return adminRepository.createCategory(name);
   },
 
-  // -----------------------
-  // Admin own info
-  // -----------------------
+  async getAllCategories() {
+    return adminRepository.getAllCategories();
+  },
+
+  async updateCategory(id: string, name: string) {
+    return adminRepository.updateCategory(id, name);
+  },
+
+  async deleteCategory(id: string) {
+    return adminRepository.deleteCategory(id);
+  },
+
   async updateAdminInfo(adminId: string, data: Partial<{ name: string; email: string; password: string }>) {
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
     return adminRepository.updateAdmin(adminId, data);
+  },
+
+  // -----------------------
+  // Offers & Requests
+  // -----------------------
+  async getAllOffers() {
+    return prisma.serviceOffer.findMany({
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  async getAllRequests() {
+    return prisma.serviceRequest.findMany({
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+    });
   },
 };
