@@ -15,8 +15,8 @@ const PORT = process.env.PORT || 4000;
 app.use(cors({
   origin: [
     'http://localhost:4000',                      // Local frontend for testing
-    'https://service-community-frontend-ayps.vercel.app',     // Your Vercel Frontend (NO trailing slash)
-    'https://service-community-frontend-ayps.vercel.app/'     // Sometimes browsers send the slash, safe to add both
+    'https://service-community-frontend.vercel.app',     // Your Vercel Frontend (NO trailing slash)
+    'https://service-community-frontend.vercel.app/'     // Sometimes browsers send the slash, safe to add both
   ],
   credentials: true, // This allows cookies/sessions to work
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
