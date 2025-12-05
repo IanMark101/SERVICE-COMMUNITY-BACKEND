@@ -19,7 +19,7 @@ app.use(cors({
     'https://service-community-frontend.vercel.app/'     // Sometimes browsers send the slash, safe to add both
   ],
   credentials: true, // This allows cookies/sessions to work
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
