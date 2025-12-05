@@ -11,12 +11,7 @@ export const authService = {
     if (existing) throw new Error("Email already exists");
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await userRepository.createUser({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    const user = await userRepository.createUser({ name, email, password: hashedPassword });
 
     return { id: user.id, email: user.email, name: user.name };
   },
@@ -31,27 +26,6 @@ export const authService = {
 
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
 
-    return {
-      token,
-      user: { id: user.id, name: user.name, email: user.email },
-    };
-  },
-
-  async getMe(userId: string) {
-    const user = await userRepository.findById(userId);
-    if (!user) throw new Error("User not found");
-
-    return { id: user.id, name: user.name, email: user.email, createdAt: user.createdAt };
-  },
-
-  async updateMe(userId: string, data: { name?: string; email?: string; password?: string }) {
-    const updateData: any = {};
-    if (data.name) updateData.name = data.name;
-    if (data.email) updateData.email = data.email;
-    if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
-
-    const updatedUser = await userRepository.updateUser(userId, updateData);
-
-    return { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, createdAt: updatedUser.createdAt };
+    return { token, user: { id: user.id, name: user.name, email: user.email } };
   },
 };

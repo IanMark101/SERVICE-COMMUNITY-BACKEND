@@ -26,17 +26,15 @@ export const reportRepository = {
     return prisma.user.findUnique({ where: { id: userId } });
   },
 
-  // 🔍 Find a report by ID
-  async findById(id: string) {
-    return prisma.report.findUnique({
-      where: { id },
-    });
+  async findUserByName(name: string) {
+    return prisma.user.findFirst({ where: { name } });
   },
 
-  // ❌ Delete a report
+  async findById(id: string) {
+    return prisma.report.findUnique({ where: { id } });
+  },
+
   async delete(id: string) {
-    return prisma.report.delete({
-      where: { id },
-    });
+    return prisma.report.delete({ where: { id } });
   }
 };

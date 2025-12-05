@@ -1,9 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import prisma from "../prisma"; // ensure this path matches your project
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13,11 +18,23 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   const token = authHeader.split(" ")[1];
 
   try {
-    // ✅ Decode token (it contains `id`, not `userId`)
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    // token has { userId, type: "user" }
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      type?: string;
+    };
 
-    // ✅ Attach the logged-in user's ID to the request
-    (req as any).userId = decoded.id;
+    (req as any).userId = decoded.userId;
+
+    // 🔴 NEW: check if the user is banned on every protected request
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { banned: true },
+    });
+
+    if (!user || user.banned) {
+      return res.status(403).json({ message: "Your account is banned" });
+    }
 
     next();
   } catch (error) {

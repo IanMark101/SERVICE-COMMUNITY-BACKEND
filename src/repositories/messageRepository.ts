@@ -38,4 +38,35 @@ export const messageRepository = {
       },
     });
   },
+
+  async getConversations(userId: string) {
+    const conversations = await prisma.message.findMany({
+      where: {
+        OR: [{ senderId: userId }, { receiverId: userId }],
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        sender: { select: { id: true, name: true } },
+        receiver: { select: { id: true, name: true } },
+      },
+    });
+
+    // Group by conversation partner
+    const grouped = new Map();
+    conversations.forEach((msg: any) => {
+      const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      const partner = msg.senderId === userId ? msg.receiver : msg.sender;
+
+      if (!grouped.has(partnerId)) {
+        grouped.set(partnerId, {
+          userId: partnerId,
+          userName: partner.name,
+          lastMessage: msg.text,
+          lastMessageTime: msg.createdAt,
+        });
+      }
+    });
+
+    return Array.from(grouped.values());
+  },
 };

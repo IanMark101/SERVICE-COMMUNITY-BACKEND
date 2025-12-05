@@ -11,7 +11,16 @@ import messageRoutes from "./routes/messageRoutes";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// ✅ Configure CORS properly
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 

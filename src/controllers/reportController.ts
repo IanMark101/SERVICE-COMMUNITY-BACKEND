@@ -1,4 +1,3 @@
-// src/controllers/reportController.ts
 import { Request, Response } from "express";
 import { reportService } from "../services/reportService";
 
@@ -6,10 +5,13 @@ import { reportService } from "../services/reportService";
 export const createReport = async (req: Request, res: Response) => {
   try {
     const reporterId = (req as any).userId;
-    const { reportedId, reason } = req.body;
+    const { reportedId, reason } = req.body; // 👈 expect reportedId + reason
 
     const report = await reportService.createReport(reporterId, reportedId, reason);
-    res.status(201).json({ message: "Report submitted successfully", report });
+
+    res
+      .status(201)
+      .json({ message: "Report submitted successfully", report });
   } catch (error: any) {
     console.error("CreateReport error:", error);
     res.status(400).json({ message: error.message || "Server error" });
@@ -27,7 +29,7 @@ export const getAllReports = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ Delete a report (admin)
+// Delete a report (admin)
 export const deleteReport = async (req: Request, res: Response) => {
   try {
     const reportId = req.params.id;

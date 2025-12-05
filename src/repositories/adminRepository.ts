@@ -62,9 +62,37 @@ export const adminRepository = {
   },
 
   async getUserStats(days: number) {
+    // Total users by status
+    const totalUsers = await prisma.user.count();
+    const activeUsers = await prisma.user.count({ where: { banned: false } });
+    const bannedUsers = await prisma.user.count({ where: { banned: true } });
+
+    // New users per day (last X days)
     const dateFrom = new Date();
     dateFrom.setDate(dateFrom.getDate() - days);
-    return prisma.user.count({ where: { createdAt: { gte: dateFrom } } });
+
+    const newUsersData = await prisma.user.findMany({
+      where: { createdAt: { gte: dateFrom } },
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    // Format the data for bar chart
+    const chartData: { [key: string]: number } = {};
+    newUsersData.forEach((user) => {
+      const date = new Date(user.createdAt).toISOString().split('T')[0];
+      chartData[date] = (chartData[date] || 0) + 1;
+    });
+
+    const newUsersPerDay = Object.entries(chartData).map(([date, count]) => ({
+      date,
+      count,
+    }));
+
+    return {
+      summary: { totalUsers, activeUsers, bannedUsers },
+      newUsersPerDay,
+    };
   },
 
   async getPostsStats() {

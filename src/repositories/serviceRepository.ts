@@ -33,8 +33,25 @@ export const serviceRepository = {
     });
   },
 
+  getOffersByUserId(userId: string, skip: number, take: number) {
+    return prisma.serviceOffer.findMany({
+      where: { userId },
+      include: {
+        category: { select: { id: true, name: true } },
+        ratings: { select: { stars: true } },
+      },
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  countOffersByUserId(userId: string) {
+    return prisma.serviceOffer.count({ where: { userId } });
+  },
+
   // Requests
-  createRequest(data: { description: string; userId: string }) {
+  createRequest(data: { description: string; userId: string; categoryId: string }) {
     return prisma.serviceRequest.create({ data });
   },
 
@@ -54,7 +71,7 @@ export const serviceRepository = {
     return prisma.serviceRequest.findMany({
       skip,
       take,
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { user: { select: { id: true, name: true, email: true } }, category: true },
       orderBy: { createdAt: "desc" },
     });
   },
@@ -63,8 +80,68 @@ export const serviceRepository = {
     return prisma.serviceRequest.count();
   },
 
+  getRequestsByCategory(categoryId: string, skip: number, take: number) {
+    return prisma.serviceRequest.findMany({
+      where: { categoryId },
+      skip,
+      take,
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        category: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  countRequestsByCategory(categoryId: string) {
+    return prisma.serviceRequest.count({ where: { categoryId } });
+  },
+
+  getRequestsByUserId(userId: string, skip: number, take: number) {
+    return prisma.serviceRequest.findMany({
+      where: { userId },
+      include: {
+        category: { select: { id: true, name: true } },
+      },
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  countRequestsByUserId(userId: string) {
+    return prisma.serviceRequest.count({ where: { userId } });
+  },
+
   // Ratings
   createRating(data: { offerId: string; providerId: string; stars: number }) {
     return prisma.rating.create({ data });
+  },
+
+  getRatingsByUserId(userId: string, skip: number, take: number) {
+    return prisma.rating.findMany({
+      where: {
+        offer: {
+          userId,
+        },
+      },
+      include: {
+        provider: { select: { id: true, name: true, email: true } },
+        offer: { select: { id: true, title: true } },
+      },
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  countRatingsByUserId(userId: string) {
+    return prisma.rating.count({
+      where: {
+        offer: {
+          userId,
+        },
+      },
+    });
   },
 };
