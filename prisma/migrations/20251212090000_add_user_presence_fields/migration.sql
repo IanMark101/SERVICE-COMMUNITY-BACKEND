@@ -1,0 +1,3 @@
+-- Add presence tracking fields to the User model
+ALTER TABLE "User" ADD COLUMN "isOnline" BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE "User" ADD COLUMN "lastSeenAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

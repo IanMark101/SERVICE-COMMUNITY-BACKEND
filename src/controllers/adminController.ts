@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../prisma";
 import { adminService } from "../services/adminService";
 import { reportService } from "../services/reportService";
+import { presenceTimeoutMinutes } from "../utils/presence";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -79,7 +80,7 @@ export const getUsers = async (req: Request, res: Response) => {
   try {
     const banned = req.query.banned !== undefined ? req.query.banned === "true" : undefined;
     const users = await adminService.getAllUsers({ banned });
-    res.json({ users });
+    res.json({ users, presenceTimeoutMinutes });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

@@ -14,7 +14,7 @@ export const userRepository = {
     return prisma.user.create({ data });
   },
 
-  async updateUser(id: string, data: { name?: string; email?: string; password?: string }) {
+  async updateUser(id: string, data: { name?: string; email?: string; password?: string; isOnline?: boolean; lastSeenAt?: Date }) {
     return prisma.user.update({ where: { id }, data });
   },
 
@@ -28,7 +28,7 @@ export const userRepository = {
         : {},
       skip,
       take,
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, createdAt: true, isOnline: true, lastSeenAt: true },
       orderBy: { createdAt: "desc" },
     });
   },
@@ -41,6 +41,30 @@ export const userRepository = {
     });
   },
 
+  async markUserOnline(id: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { isOnline: true, lastSeenAt: new Date() },
+      select: { id: true, isOnline: true, lastSeenAt: true },
+    });
+  },
+
+  async markUserOffline(id: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { isOnline: false, lastSeenAt: new Date() },
+      select: { id: true, isOnline: true, lastSeenAt: true },
+    });
+  },
+
+  async touchLastSeen(id: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { lastSeenAt: new Date() },
+      select: { id: true, isOnline: true, lastSeenAt: true },
+    });
+  },
+
   // FULL USER PROFILE WITH OFFERS, RATINGS, AND REQUESTS
   async getUserProfile(userId: string) {
     return prisma.user.findUnique({
@@ -50,6 +74,8 @@ export const userRepository = {
         name: true,
         email: true,
         createdAt: true,
+        isOnline: true,
+        lastSeenAt: true,
 
         // Offers with ratings
         offers: {

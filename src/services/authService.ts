@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { userRepository } from "../repositories/userRepository";
+import { normalizePresence } from "../utils/presence";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -24,8 +25,19 @@ export const authService = {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new Error("Invalid credentials");
 
+    const presence = normalizePresence(await userRepository.markUserOnline(user.id));
+
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
 
-    return { token, user: { id: user.id, name: user.name, email: user.email } };
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isOnline: presence?.isOnline,
+        lastSeenAt: presence?.lastSeenAt,
+      },
+    };
   },
 };

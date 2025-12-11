@@ -1,6 +1,7 @@
 // src/controllers/userController.ts
 import { Request, Response } from "express";
 import { userService } from "../services/userService";
+import { presenceTimeoutMinutes } from "../utils/presence";
 
 export const searchUsers = async (req: Request, res: Response) => {
   try {
@@ -32,7 +33,7 @@ export const getMe = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const user = await userService.getMe(userId);
-    res.json(user);
+    res.json({ ...user, presenceTimeoutMinutes });
   } catch (error: any) {
     const status = error.message === "Unauthorized" ? 401 : error.message === "User not found" ? 404 : 500;
     res.status(status).json({ message: error.message || "Server error" });
@@ -69,6 +70,8 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         role: updated.role,
         createdAt: updated.createdAt,
         banned: updated.banned,
+        isOnline: updated.isOnline,
+        lastSeenAt: updated.lastSeenAt,
       },
     });
   } catch (error: any) {
@@ -79,6 +82,31 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email already in use" });
     }
     console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updatePresence = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const rawStatus = typeof req.body.status === "string" ? req.body.status.toLowerCase() : undefined;
+    const status = rawStatus === "online" || rawStatus === "offline" ? rawStatus : undefined;
+
+    if (rawStatus && !status) {
+      return res.status(400).json({ message: "Status must be either 'online' or 'offline'" });
+    }
+
+    const presence = status
+      ? await userService.updatePresence(userId, status)
+      : await userService.heartbeat(userId);
+
+    res.json({
+      message: status ? `User marked as ${status}` : "Presence updated",
+      presence,
+      presenceTimeoutMinutes,
+    });
+  } catch (error) {
+    console.error("Update presence error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -9,7 +9,7 @@ export const adminRepository = {
   async banUser(id: string) {
     return prisma.user.update({
       where: { id },
-      data: { banned: true },
+      data: { banned: true, isOnline: false },
     });
   },
 
@@ -46,7 +46,7 @@ export const adminRepository = {
     const whereClause = filter?.banned !== undefined ? { banned: filter.banned } : {};
     return prisma.user.findMany({
       where: whereClause,
-      select: { id: true, name: true, email: true, banned: true, createdAt: true },
+      select: { id: true, name: true, email: true, banned: true, createdAt: true, isOnline: true, lastSeenAt: true },
       orderBy: { createdAt: "desc" },
     });
   },
@@ -54,8 +54,8 @@ export const adminRepository = {
   async getReports() {
     return prisma.report.findMany({
       include: {
-        reporter: { select: { id: true, name: true, email: true, banned: true } },
-        reported: { select: { id: true, name: true, email: true, banned: true } },
+        reporter: { select: { id: true, name: true, email: true, banned: true, isOnline: true, lastSeenAt: true } },
+        reported: { select: { id: true, name: true, email: true, banned: true, isOnline: true, lastSeenAt: true } },
       },
       orderBy: { createdAt: "desc" },
     });

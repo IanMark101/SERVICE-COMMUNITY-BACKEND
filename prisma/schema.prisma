@@ -30,6 +30,8 @@ model User {
   reportsReceived Report[] @relation("UserReportsReceived")
 
   banned          Boolean         @default(false) 
+  isOnline        Boolean         @default(false)
+  lastSeenAt      DateTime        @default(now())
 
   // --- Added for messages ---
   sentMessages     Message[] @relation("SentMessages")

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { authService } from "../services/authService";
+import { userService } from "../services/userService";
+import { presenceTimeoutMinutes } from "../utils/presence";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -37,6 +39,7 @@ export const login = async (req: Request, res: Response) => {
       type: "user",
       token,
       user: result.user,
+      presenceTimeoutMinutes,
     });
   } catch (error: any) {
     if (["Invalid credentials", "Your account is banned"].includes(error.message)) {
@@ -44,6 +47,23 @@ export const login = async (req: Request, res: Response) => {
       return res.status(status).json({ message: error.message });
     }
     console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.json({ message: "Logout successful" });
+    }
+
+    await userService.updatePresence(userId, "offline");
+
+    return res.json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

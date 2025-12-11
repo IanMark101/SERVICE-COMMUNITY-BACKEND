@@ -1,6 +1,7 @@
 // src/services/userService.ts
 import bcrypt from "bcryptjs";
 import { userRepository } from "../repositories/userRepository";
+import { normalizePresence } from "../utils/presence";
 
 export const userService = {
   async searchUsers(search: string | undefined, page: number, limit: number) {
@@ -10,11 +11,17 @@ export const userService = {
       userRepository.countUsers(search),
     ]);
 
-    return { page, totalPages: Math.ceil(total / limit), total, users };
+    return {
+      page,
+      totalPages: Math.ceil(total / limit),
+      total,
+      users: users.map((user) => normalizePresence(user)),
+    };
   },
 
   async getUserProfile(userId: string) {
-    return userRepository.getUserProfile(userId);
+    const profile = await userRepository.getUserProfile(userId);
+    return normalizePresence(profile);
   },
 
   async getMe(userId: string | undefined) {
@@ -25,7 +32,16 @@ export const userService = {
     const user = await userRepository.findById(userId);
     if (!user) throw new Error("User not found");
 
-    return { id: user.id, name: user.name, email: user.email, createdAt: user.createdAt };
+    const hydrated = normalizePresence(user);
+
+    return {
+      id: hydrated.id,
+      name: hydrated.name,
+      email: hydrated.email,
+      createdAt: hydrated.createdAt,
+      isOnline: hydrated.isOnline,
+      lastSeenAt: hydrated.lastSeenAt,
+    };
   },
 
   async verifyAndChangePassword(userId: string, currentPassword: string, newPassword: string) {
@@ -53,5 +69,18 @@ export const userService = {
     if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 
     return userRepository.updateUser(userId, updateData);
+  },
+
+  async updatePresence(userId: string, status: "online" | "offline") {
+    const presence = status === "online"
+      ? await userRepository.markUserOnline(userId)
+      : await userRepository.markUserOffline(userId);
+
+    return normalizePresence(presence);
+  },
+
+  async heartbeat(userId: string) {
+    const presence = await userRepository.touchLastSeen(userId);
+    return normalizePresence(presence);
   },
 };

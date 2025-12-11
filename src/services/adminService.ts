@@ -1,6 +1,7 @@
 import { adminRepository } from "../repositories/adminRepository";
 import bcrypt from "bcryptjs";
 import prisma from "../prisma"; // For offers & requests
+import { normalizePresence } from "../utils/presence";
 
 export const adminService = {
   async banUser(userId: string) {
@@ -24,11 +25,17 @@ export const adminService = {
   },
 
   async getAllUsers(filter?: { banned?: boolean }) {
-    return adminRepository.getAllUsers(filter);
+    const users = await adminRepository.getAllUsers(filter);
+    return users.map((user) => normalizePresence(user));
   },
 
   async getReports() {
-    return adminRepository.getReports();
+    const reports = await adminRepository.getReports();
+    return reports.map((report) => ({
+      ...report,
+      reporter: normalizePresence(report.reporter),
+      reported: normalizePresence(report.reported),
+    }));
   },
 
   async getUserStats(days: number) {

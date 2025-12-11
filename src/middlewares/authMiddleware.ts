@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma"; // ensure this path matches your project
+import { userRepository } from "../repositories/userRepository";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -29,11 +30,15 @@ export const authMiddleware = async (
     // 🔴 NEW: check if the user is banned on every protected request
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { banned: true },
+      select: { banned: true, isOnline: true },
     });
 
     if (!user || user.banned) {
       return res.status(403).json({ message: "Your account is banned" });
+    }
+
+    if (user.isOnline) {
+      await userRepository.touchLastSeen(decoded.userId);
     }
 
     next();
