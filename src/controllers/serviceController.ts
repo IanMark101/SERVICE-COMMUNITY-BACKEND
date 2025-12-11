@@ -147,11 +147,27 @@ export const createRating = async (req: Request, res: Response) => {
     const providerId = (req as any).userId;
     const { offerId, stars } = req.body;
 
-    const rating = await serviceService.createRating(providerId, offerId, stars);
-    res.status(201).json({ message: "Rating submitted", rating });
+    const { rating, updated } = await serviceService.createRating(providerId, offerId, stars);
+    const message = updated ? "Rating updated" : "Rating submitted";
+    res.status(updated ? 200 : 201).json({ message, rating });
   } catch (error: any) {
     console.error(error);
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const checkIfAlreadyRated = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { offerId } = req.params;
+
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const existingRating = await serviceService.checkRating(offerId, userId);
+    res.json({ alreadyRated: !!existingRating });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

@@ -49,7 +49,6 @@ export const userRepository = {
         id: true,
         name: true,
         email: true,
-        profilePicture: true,
         createdAt: true,
 
         // Offers with ratings
@@ -90,3 +89,7 @@ export const userRepository = {
     });
   },
 };
+
+// for password controller
+export const findUserByEmail = (email: string) =>
+  userRepository.findByEmail(email);

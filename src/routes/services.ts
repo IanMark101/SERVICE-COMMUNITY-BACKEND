@@ -25,6 +25,7 @@ router.delete("/request/:requestId", authMiddleware, serviceController.deleteReq
 // Ratings
 router.post("/rate", authMiddleware, serviceController.createRating);
 router.get("/ratings/:userId", serviceController.getUserRatings);
+router.get("/check-rating/:offerId", authMiddleware, serviceController.checkIfAlreadyRated);
 
 // View specific user's offers
 router.get("/offers/user/:userId", serviceController.getUserOffers);

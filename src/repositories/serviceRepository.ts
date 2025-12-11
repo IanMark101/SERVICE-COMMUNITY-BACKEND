@@ -6,6 +6,26 @@ export const serviceRepository = {
     return prisma.serviceCategory.findMany();
   },
 
+  findCategoryByName(name: string) {
+    return prisma.serviceCategory.findUnique({ where: { name } });
+  },
+
+  createCategory(data: { name: string }) {
+    return prisma.serviceCategory.create({ data });
+  },
+
+  deleteCategory(categoryId: string) {
+    return prisma.serviceCategory.delete({ where: { id: categoryId } });
+  },
+
+  deleteOffersByCategory(categoryId: string) {
+    return prisma.serviceOffer.deleteMany({ where: { categoryId } });
+  },
+
+  deleteRequestsByCategory(categoryId: string) {
+    return prisma.serviceRequest.deleteMany({ where: { categoryId } });
+  },
+
   // Offers
   createOffer(data: { title: string; description: string; categoryId: string; userId: string }) {
     return prisma.serviceOffer.create({ data });
@@ -116,6 +136,19 @@ export const serviceRepository = {
   // Ratings
   createRating(data: { offerId: string; providerId: string; stars: number }) {
     return prisma.rating.create({ data });
+  },
+
+  getRatingByOfferAndProvider(offerId: string, providerId: string) {
+    return prisma.rating.findFirst({
+      where: { offerId, providerId },
+    });
+  },
+
+  updateRating(offerId: string, providerId: string, stars: number) {
+    return prisma.rating.updateMany({
+      where: { offerId, providerId },
+      data: { stars },
+    });
   },
 
   getRatingsByUserId(userId: string, skip: number, take: number) {

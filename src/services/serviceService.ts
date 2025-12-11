@@ -87,7 +87,19 @@ export const serviceService = {
   // Ratings
   async createRating(providerId: string, offerId: string, stars: number) {
     if (stars < 1 || stars > 5) throw new Error("Stars must be between 1 and 5");
-    return serviceRepository.createRating({ providerId, offerId, stars });
+    const existingRating = await serviceRepository.getRatingByOfferAndProvider(offerId, providerId);
+
+    if (existingRating) {
+      await serviceRepository.updateRating(offerId, providerId, stars);
+      return { rating: { ...existingRating, stars }, updated: true };
+    }
+
+    const rating = await serviceRepository.createRating({ providerId, offerId, stars });
+    return { rating, updated: false };
+  },
+
+  async checkRating(offerId: string, providerId: string) {
+    return serviceRepository.getRatingByOfferAndProvider(offerId, providerId);
   },
 
   async getMyOffers(userId: string, page: number, limit: number) {

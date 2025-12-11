@@ -67,7 +67,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         name: updated.name,
         email: updated.email,
         role: updated.role,
-        profilePicture: updated.profilePicture,
         createdAt: updated.createdAt,
         banned: updated.banned,
       },

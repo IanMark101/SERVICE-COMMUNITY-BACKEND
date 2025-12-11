@@ -7,6 +7,7 @@ import adminRoutes from "./routes/adminRoutes";
 import reportRoutes from "./routes/reportRoutes";
 import userRoutes from "./routes/userRoutes";
 import messageRoutes from "./routes/messageRoutes";
+import suggestionRoutes from "./routes/suggestionRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -38,6 +39,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/suggestions", suggestionRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
