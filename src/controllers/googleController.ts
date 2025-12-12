@@ -26,7 +26,7 @@ export const googleCallback = async (req: Request, res: Response) => {
     const token = generateJWT(user.id);
 
     // Redirect to frontend with token (frontend will handle storing in localStorage)
-    res.redirect(`https://service-community-frontend.vercel.app/auth/login?token=${token}`);
+    res.redirect(`http://localhost:3000/auth/login?token=${token}`);
   } catch (error) {
     console.error("Google OAuth error:", error);
     res.redirect(`http://localhost:3000/auth/login?error=oauth_failed`);
