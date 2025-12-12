@@ -27,7 +27,7 @@ export const authMiddleware = async (
 
     (req as any).userId = decoded.userId;
 
-    // 🔴 NEW: check if the user is banned on every protected request
+    // check if the user is banned on every protected request
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { banned: true, isOnline: true },

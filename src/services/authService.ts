@@ -27,7 +27,7 @@ export const authService = {
 
     const presence = normalizePresence(await userRepository.markUserOnline(user.id));
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ userId: user.id, type: "user" }, JWT_SECRET, { expiresIn: "7d" });
 
     return {
       token,
