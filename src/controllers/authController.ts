@@ -27,7 +27,7 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const result = await authService.login(email, password); // result.user
 
-    // ✅ create a USER token here, different payload from admin
+    //USER token, different payload from admin
     const token = jwt.sign(
       { userId: result.user.id, type: "user" },
       JWT_SECRET,
